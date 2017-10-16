@@ -29,7 +29,14 @@ import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import java.lang.Boolean;
 
-public class RSSignatureCaptureMainView extends LinearLayout implements OnClickListener,RSSignatureCaptureView.SignatureCallback {
+/** NEW */
+import android.net.Uri;
+import android.support.v4.content.FileProvider;
+
+/** MODIFICATION */
+
+public class RSSignatureCaptureMainView extends LinearLayout
+    implements OnClickListener, RSSignatureCaptureView.SignatureCallback {
   LinearLayout buttonsLayout;
   RSSignatureCaptureView signatureView;
 
@@ -40,15 +47,17 @@ public class RSSignatureCaptureMainView extends LinearLayout implements OnClickL
   Boolean showNativeButtons = true;
   Boolean showTitleLabel = true;
   int maxSize = 500;
+  Context _context = null;
 
   public RSSignatureCaptureMainView(Context context, Activity activity) {
     super(context);
+    this._context = context;
     Log.d("React:", "RSSignatureCaptureMainView(Contructtor)");
     mOriginalOrientation = activity.getRequestedOrientation();
     mActivity = activity;
 
     this.setOrientation(LinearLayout.VERTICAL);
-    this.signatureView = new RSSignatureCaptureView(context,this);
+    this.signatureView = new RSSignatureCaptureView(context, this);
     // add the buttons and signature views
     this.buttonsLayout = this.buttonsLayout();
     this.addView(this.buttonsLayout);
@@ -86,7 +95,6 @@ public class RSSignatureCaptureMainView extends LinearLayout implements OnClickL
     this.maxSize = size;
   }
 
-
   private LinearLayout buttonsLayout() {
 
     // create the UI programatically
@@ -115,7 +123,8 @@ public class RSSignatureCaptureMainView extends LinearLayout implements OnClickL
   }
 
   // the on click listener of 'save' and 'clear' buttons
-  @Override public void onClick(View v) {
+  @Override
+  public void onClick(View v) {
     String tag = v.getTag().toString().trim();
 
     // save the signature
@@ -145,7 +154,11 @@ public class RSSignatureCaptureMainView extends LinearLayout implements OnClickL
     }
 
     // set the file name of your choice
-    String fname = "signature.png";
+    //String fname = "signature.png";
+
+    Long tsLong = System.currentTimeMillis() / 1000;
+    String ts = tsLong.toString();
+    String fname = "signature" + ts + ".png";
 
     // in our case, we delete the previous file, you can remove this
     File file = new File(myDir, fname);
@@ -154,6 +167,7 @@ public class RSSignatureCaptureMainView extends LinearLayout implements OnClickL
     }
 
     try {
+      ReactContext reactContext = (ReactContext) getContext();
 
       Log.d("React Signature", "Save file-======:" + saveFileInExtStorage);
       // save the signature
@@ -164,11 +178,9 @@ public class RSSignatureCaptureMainView extends LinearLayout implements OnClickL
         out.close();
       }
 
-
       ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
       Bitmap resizedBitmap = getResizedBitmap(this.signatureView.getSignature());
       resizedBitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-
 
       byte[] byteArray = byteArrayOutputStream.toByteArray();
       String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
@@ -176,7 +188,18 @@ public class RSSignatureCaptureMainView extends LinearLayout implements OnClickL
       WritableMap event = Arguments.createMap();
       event.putString("pathName", file.getAbsolutePath());
       event.putString("encoded", encoded);
-      ReactContext reactContext = (ReactContext) getContext();
+
+      final String packageName = reactContext.getApplicationContext().getPackageName();
+      final String authority = new StringBuilder(packageName).append(".provider").toString();
+      Uri result = null;
+      try {
+        result = FileProvider.getUriForFile(reactContext, authority, file);
+      } catch (IllegalArgumentException e) {
+        e.printStackTrace();
+      }
+      if (result != null) {
+        event.putString("URI", result.toString());
+      }
       reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(getId(), "topChange", event);
     } catch (Exception e) {
       e.printStackTrace();
@@ -184,7 +207,7 @@ public class RSSignatureCaptureMainView extends LinearLayout implements OnClickL
   }
 
   public Bitmap getResizedBitmap(Bitmap image) {
-    Log.d("React Signature","maxSize:"+maxSize);
+    Log.d("React Signature", "maxSize:" + maxSize);
     int width = image.getWidth();
     int height = image.getHeight();
 
@@ -200,14 +223,14 @@ public class RSSignatureCaptureMainView extends LinearLayout implements OnClickL
     return Bitmap.createScaledBitmap(image, width, height, true);
   }
 
-
   public void reset() {
     if (this.signatureView != null) {
       this.signatureView.clearSignature();
     }
   }
 
-  @Override public void onDragged() {
+  @Override
+  public void onDragged() {
     WritableMap event = Arguments.createMap();
     event.putBoolean("dragged", true);
     ReactContext reactContext = (ReactContext) getContext();

@@ -18,6 +18,7 @@
 	BOOL _square;
 	BOOL _showNativeButtons;
 	BOOL _showTitleLabel;
+
 }
 
 @synthesize sign;
@@ -52,21 +53,29 @@
 	[super layoutSubviews];
 	if (!_loaded) {
 
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didRotate:)
-																								 name:UIDeviceOrientationDidChangeNotification object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didRotate:) name:UIDeviceOrientationDidChangeNotification object:nil];
 
 		_context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
 
 		CGSize screen = self.bounds.size;
+       
+        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        sign = [[PPSSignatureView alloc]
+                initWithFrame: CGRectMake(0, 0, screen.width, screen.height)
+                context: _context];
+        }
+        else{
+            sign = [[PPSSignatureView alloc]
+                    initWithFrame: CGRectMake(0, 0, screen.height, screen.width)
+                    context: _context];
 
-		sign = [[PPSSignatureView alloc]
-						initWithFrame: CGRectMake(0, 0, screen.width, screen.height)
-						context: _context];
-		sign.manager = manager;
-
+        }
+        sign.manager = manager;
+        
 		[self addSubview:sign];
 
-		if ( UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ) {
+		//IPad layout
+		if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
 
 			if (_showTitleLabel) {
 				titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, 24)];
@@ -108,6 +117,53 @@
 				[sign addSubview:clearButton];
 			}
 		}
+		//Mobile layout
+		else if(true){
+			if (_showTitleLabel) {
+				//titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.height, 24)];
+				//
+
+                titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.height - 80, 24)];
+				//[titleLabel setCenter:CGPointMake(40, self.bounds.size.height/2)];
+                [titleLabel setCenter:CGPointMake(self.bounds.size.height/2+20, self.bounds.size.width -140)];
+
+				[titleLabel setText:@"x_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _"];
+				[titleLabel setLineBreakMode:NSLineBreakByClipping];
+				[titleLabel setTextAlignment: NSTextAlignmentCenter];
+				[titleLabel setTextColor:[UIColor colorWithRed:200/255.f green:200/255.f blue:200/255.f alpha:1.f]];
+				//[titleLabel setBackgroundColor:[UIColor greenColor]];
+				[sign addSubview:titleLabel];
+			}
+
+			if (_showNativeButtons) {
+				//Save button
+				saveButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+				[saveButton setLineBreakMode:NSLineBreakByClipping];
+				[saveButton addTarget:self action:@selector(onSaveButtonPressed)
+				            forControlEvents:UIControlEventTouchUpInside];
+				[saveButton setTitle:@"Save" forState:UIControlStateNormal];
+
+				CGSize buttonSize = CGSizeMake(80, 55.0);
+
+				saveButton.frame = CGRectMake(sign.bounds.size.width - buttonSize.width,
+				                              0, buttonSize.width, buttonSize.height);
+				[saveButton setBackgroundColor:[UIColor colorWithRed:250/255.f green:250/255.f blue:250/255.f alpha:1.f]];
+				[sign addSubview:saveButton];
+
+
+				//Clear button
+				clearButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+				[clearButton setLineBreakMode:NSLineBreakByClipping];
+				[clearButton addTarget:self action:@selector(onClearButtonPressed)
+				             forControlEvents:UIControlEventTouchUpInside];
+				[clearButton setTitle:@"Reset" forState:UIControlStateNormal];
+
+				clearButton.frame = CGRectMake(0, 0, buttonSize.width, buttonSize.height);
+				[clearButton setBackgroundColor:[UIColor colorWithRed:250/255.f green:250/255.f blue:250/255.f alpha:1.f]];
+				[sign addSubview:clearButton];
+			}
+		}
+		//Mobile Layout
 		else {
 
 			if (_showTitleLabel) {
@@ -189,7 +245,14 @@
 
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
 	NSString *documentsDirectory = [paths firstObject];
-	NSString *tempPath = [documentsDirectory stringByAppendingFormat:@"/signature.png"];
+
+    // ORIGINAL SETTING;
+    // NSString *tempPath = [documentsDirectory stringByAppendingFormat:@"/signature.png"];
+
+    NSString * timestamp = [NSString stringWithFormat:@"%f",[[NSDate date] timeIntervalSince1970]];
+    timestamp = [timestamp stringByAppendingString:@".png"];
+    NSString *tempPath = [documentsDirectory stringByAppendingFormat:@"/signature"];
+    tempPath = [tempPath stringByAppendingString:timestamp];
 
 	//remove if file already exists
 	if ([[NSFileManager defaultManager] fileExistsAtPath:tempPath]) {

@@ -106,7 +106,6 @@ public class RSSignatureCaptureView extends View {
 		return signatureBitmap;
 	}
 
-
 	/**
 	* clear signature canvas
 	*/
@@ -119,7 +118,8 @@ public class RSSignatureCaptureView extends View {
 		if (mPoints.size() > 2) {
 			// To reduce the initial lag make it work with 3 mPoints
 			// by copying the first point to the beginning.
-			if (mPoints.size() == 3) mPoints.add(0, mPoints.get(0));
+			if (mPoints.size() == 3)
+				mPoints.add(0, mPoints.get(0));
 
 			ControlTimedPoints tmp = calculateCurveControlPoints(mPoints.get(0), mPoints.get(1), mPoints.get(2));
 			TimedPoint c2 = tmp.c2;
@@ -133,8 +133,7 @@ public class RSSignatureCaptureView extends View {
 			float velocity = endPoint.velocityFrom(startPoint);
 			velocity = Float.isNaN(velocity) ? 0.0f : velocity;
 
-			velocity = mVelocityFilterWeight * velocity
-					+ (1 - mVelocityFilterWeight) * mLastVelocity;
+			velocity = mVelocityFilterWeight * velocity + (1 - mVelocityFilterWeight) * mLastVelocity;
 
 			// The new width is a function of the velocity. Higher velocities
 			// correspond to thinner strokes.
@@ -191,8 +190,7 @@ public class RSSignatureCaptureView extends View {
 
 	private void ensureSignatureBitmap() {
 		if (mSignatureBitmap == null) {
-			mSignatureBitmap = Bitmap.createBitmap(getWidth(), getHeight(),
-					Bitmap.Config.ARGB_8888);
+			mSignatureBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
 			mSignatureBitmapCanvas = new Canvas(mSignatureBitmap);
 		}
 	}
@@ -233,40 +231,38 @@ public class RSSignatureCaptureView extends View {
 		float eventY = event.getY();
 
 		switch (event.getAction()) {
-			case MotionEvent.ACTION_DOWN:
-				getParent().requestDisallowInterceptTouchEvent(true);
-				mPoints.clear();
-				mPath.moveTo(eventX, eventY);
-				mLastTouchX = eventX;
-				mLastTouchY = eventY;
-				addPoint(new TimedPoint(eventX, eventY));
+		case MotionEvent.ACTION_DOWN:
+			getParent().requestDisallowInterceptTouchEvent(true);
+			mPoints.clear();
+			mPath.moveTo(eventX, eventY);
+			mLastTouchX = eventX;
+			mLastTouchY = eventY;
+			addPoint(new TimedPoint(eventX, eventY));
 
-			case MotionEvent.ACTION_MOVE:
-				resetDirtyRect(eventX, eventY);
-				addPoint(new TimedPoint(eventX, eventY));
-				if((Math.abs(mLastTouchX - eventX) > SCROLL_THRESHOLD || Math.abs(mLastTouchY - eventY) > SCROLL_THRESHOLD)){
-					dragged = true;
-				}
-				break;
+		case MotionEvent.ACTION_MOVE:
+			resetDirtyRect(eventX, eventY);
+			addPoint(new TimedPoint(eventX, eventY));
+			if ((Math.abs(mLastTouchX - eventX) > SCROLL_THRESHOLD
+					|| Math.abs(mLastTouchY - eventY) > SCROLL_THRESHOLD)) {
+				dragged = true;
+			}
+			break;
 
-			case MotionEvent.ACTION_UP:
-				resetDirtyRect(eventX, eventY);
-				addPoint(new TimedPoint(eventX, eventY));
-				getParent().requestDisallowInterceptTouchEvent(true);
-				setIsEmpty(false);
-				sendDragEventToReact();
-				break;
+		case MotionEvent.ACTION_UP:
+			resetDirtyRect(eventX, eventY);
+			addPoint(new TimedPoint(eventX, eventY));
+			getParent().requestDisallowInterceptTouchEvent(true);
+			setIsEmpty(false);
+			sendDragEventToReact();
+			break;
 
-			default:
-				return false;
+		default:
+			return false;
 		}
 
 		//invalidate();
-		invalidate(
-				(int) (mDirtyRect.left - mMaxWidth),
-				(int) (mDirtyRect.top - mMaxWidth),
-				(int) (mDirtyRect.right + mMaxWidth),
-				(int) (mDirtyRect.bottom + mMaxWidth));
+		invalidate((int) (mDirtyRect.left - mMaxWidth), (int) (mDirtyRect.top - mMaxWidth),
+				(int) (mDirtyRect.right + mMaxWidth), (int) (mDirtyRect.bottom + mMaxWidth));
 
 		return true;
 	}
@@ -284,7 +280,6 @@ public class RSSignatureCaptureView extends View {
 			canvas.drawBitmap(mSignatureBitmap, 0, 0, mPaint);
 		}
 	}
-
 
 	/**
 	 * Called when replaying history to ensure the dirty region includes all
@@ -321,7 +316,6 @@ public class RSSignatureCaptureView extends View {
 		mDirtyRect.bottom = Math.max(mLastTouchY, eventY);
 	}
 
-
 	private void setIsEmpty(boolean newValue) {
 		mIsEmpty = newValue;
 		if (mOnSignedListener != null) {
@@ -350,8 +344,8 @@ public class RSSignatureCaptureView extends View {
 		invalidate();
 	}
 
-	private int convertDpToPx(float dp){
-		return Math.round(dp*(getResources().getDisplayMetrics().xdpi/ DisplayMetrics.DENSITY_DEFAULT));
+	private int convertDpToPx(float dp) {
+		return Math.round(dp * (getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT));
 	}
 
 	public interface OnSignedListener {
