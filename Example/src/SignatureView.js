@@ -18,6 +18,49 @@ class SignatureView extends Component {
     static propTypes = {
         onSave: PropTypes.func
     };
+<<<<<<< HEAD
+=======
+  }
+
+  show(display) {
+    this.setState({visible: display});
+  }
+
+  render() {
+    const {visible} = this.state;
+
+    return (
+      <Modal transparent={false} visible={visible} onRequestClose={this._onRequreClose.bind(this)}>
+        <View style={modalViewStyle}>
+          <View style={{padding: 10, flexDirection: 'row'}}>
+            <Text onPress={this._onPressClose.bind(this)}>{' x '}</Text>
+            <View style={{flex: 1, alignItems: 'center'}}>
+              <Text style={{fontSize: 14}}>Please write your signature.</Text>
+            </View>
+          </View>
+          <SignatureCapture
+              style={{flex: 1, width: '100%'}}
+            onDragEvent={this._onDragEvent.bind(this)}
+            onSaveEvent={this._onSaveEvent.bind(this)}
+          />
+        </View>
+      </Modal>
+    );
+  }
+
+  _onPressClose() {
+    this.show(false);
+  }
+
+  _onRequreClose() {
+    this.show(false);
+  }
+
+  _onDragEvent() {
+    // This callback will be called when the user enters signature
+   console.log("dragged");
+  }
+>>>>>>> 811a4e11dcb72267085a2dcd78e3ce316ccacd6a
 
     constructor(props) {
         super(props);
