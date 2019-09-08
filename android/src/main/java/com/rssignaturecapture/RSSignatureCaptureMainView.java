@@ -68,6 +68,10 @@ public class RSSignatureCaptureMainView extends LinearLayout
         ViewGroup.LayoutParams.MATCH_PARENT));
   }
 
+  public RSSignatureCaptureView getSignatureView() {
+    return signatureView;
+  }
+
   public void setSaveFileInExtStorage(Boolean saveFileInExtStorage) {
     this.saveFileInExtStorage = saveFileInExtStorage;
   }

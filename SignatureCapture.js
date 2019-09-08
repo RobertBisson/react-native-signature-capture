@@ -65,7 +65,7 @@ class SignatureCapture extends React.Component {
     saveImage() {
         UIManager.dispatchViewManagerCommand(
             ReactNative.findNodeHandle(this),
-            UIManager.RSSignatureView.Commands.saveImage,
+            UIManager.getViewManagerConfig("RSSignatureView").Commands.saveImage,
             []
         );
     }
@@ -73,7 +73,7 @@ class SignatureCapture extends React.Component {
     resetImage() {
         UIManager.dispatchViewManagerCommand(
             ReactNative.findNodeHandle(this),
-            UIManager.RSSignatureView.Commands.resetImage,
+            UIManager.getViewManagerConfig("RSSignatureView").Commands.resetImage,
             []
         );
     }
@@ -88,7 +88,11 @@ SignatureCapture.propTypes = {
     showBorder: PropTypes.bool,
     showNativeButtons: PropTypes.bool,
     showTitleLabel: PropTypes.bool,
-    maxSize: PropTypes.number
+    maxSize: PropTypes.number,
+    minStrokeWidth: PropTypes.number,
+    maxStrokeWidth: PropTypes.number,
+    strokeColor: PropTypes.string,
+    backgroundColor: PropTypes.string
 };
 
 var RSSignatureView = requireNativeComponent("RSSignatureView", SignatureCapture, {
